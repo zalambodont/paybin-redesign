@@ -1,11 +1,41 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
+
+// Custom hook for scroll animations
+const useScrollAnimation = (animationClass: string) => {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          } else {
+            entry.target.classList.remove('visible');
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+    );
+
+    if (ref.current) {
+      ref.current.classList.add(animationClass);
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, [animationClass]);
+
+  return ref;
+};
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState("api");
   const [activeFaqItem, setActiveFaqItem] = useState("licenseKeys");
+  const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
 
   const faqItems = [
     {
@@ -83,10 +113,10 @@ export default function Home() {
   };
 
   const tabs = [
-    { id: "api", label: "API Reference" },
-    { id: "quickstart", label: "Quickstart" },
-    { id: "auth", label: "Authentication" },
-    { id: "resources", label: "All Resources", href: "https://developers.paybin.io/" }
+    { id: "api", label: "API Reference", external: false },
+    { id: "quickstart", label: "Quickstart", external: false },
+    { id: "auth", label: "Authentication", external: false },
+    { id: "resources", label: "All Resources", href: "https://developers.paybin.io/", external: true }
   ];
 
   const tabContent = {
@@ -188,13 +218,15 @@ https://docs.paybin.io/api`
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <div className="flex items-center">
-              <Image
-                src="/paybin-logo-white.svg"
-                alt="PayBin"
-                width={120}
-                height={32}
-                className="h-8 w-auto"
-              />
+              <a href="/" className="flex items-center">
+                <Image
+                  src="/paybin-logo-white.svg"
+                  alt="PayBin"
+                  width={120}
+                  height={32}
+                  className="h-8 w-auto"
+                />
+              </a>
             </div>
 
             {/* Navigation Links */}
@@ -207,6 +239,12 @@ https://docs.paybin.io/api`
               </a>
               <a href="#integration" className="text-gray-300 hover:text-white transition-colors">
                 Integration
+              </a>
+              <a href="/blog" className="text-gray-300 hover:text-white transition-colors">
+                Blog
+              </a>
+              <a href="/company" className="text-gray-300 hover:text-white transition-colors">
+                Company
               </a>
               <a href="https://developers.paybin.io" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition-colors">
                 API Docs
@@ -231,20 +269,20 @@ https://docs.paybin.io/api`
       {/* Hero Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-black">
         <div className="max-w-7xl mx-auto text-center">
-          <div className="mb-8">
+          <div className="mb-8" ref={useScrollAnimation('scroll-fade-in-up')}>
             <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-800 text-gray-400 border border-gray-700">
               Trusted by 10,000+ businesses worldwide
             </span>
           </div>
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-300 mb-6">
+          <h1 className="text-5xl md:text-6xl font-bold text-gray-300 mb-6" ref={useScrollAnimation('scroll-fade-in-up')}>
             The simplest way to<br />
             <span className="text-gray-500">accept payments</span>
           </h1>
-          <p className="text-xl text-gray-500 mb-8 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-500 mb-8 max-w-3xl mx-auto" ref={useScrollAnimation('scroll-fade-in-up')}>
             Start accepting payments in minutes. No complex setup, no hidden fees. 
             Just simple, secure payments for your business.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center" ref={useScrollAnimation('scroll-fade-in-up')}>
             <button className="bg-gray-800 text-gray-300 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-700 font-mono">
               Start now — it's free
             </button>
@@ -252,7 +290,7 @@ https://docs.paybin.io/api`
               View Demo
             </button>
           </div>
-          <div className="mt-8 flex justify-center space-x-8 text-sm text-gray-600 font-mono">
+          <div className="mt-8 flex justify-center space-x-8 text-sm text-gray-600 font-mono" ref={useScrollAnimation('scroll-fade-in-up')}>
             <span>✓ No setup fees</span>
             <span>✓ No monthly fees</span>
             <span>✓ No hidden costs</span>
@@ -264,7 +302,7 @@ https://docs.paybin.io/api`
       {/* Features Section */}
       <section id="features" className="pt-20 sm:pt-24 lg:pt-32 pb-10 sm:pb-12 lg:pb-16 bg-white dark:bg-gray-900">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+          <div className="text-center mb-16" ref={useScrollAnimation('scroll-bounce-in')}>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">
               Everything you need
             </h2>
@@ -275,7 +313,7 @@ https://docs.paybin.io/api`
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 auto-rows-[16rem] gap-4">
             {/* Fast & Secure Payments - Large Card */}
-            <div className="feature-card group relative overflow-hidden rounded-xl bg-white/60 dark:bg-white/5 backdrop-blur shadow-md dark:shadow-none p-6 flex flex-col justify-end transform-gpu transition-all duration-300 lg:col-span-2 lg:row-span-2">
+            <div className="feature-card group relative overflow-hidden rounded-xl bg-white/60 dark:bg-white/5 backdrop-blur shadow-md dark:shadow-none p-6 flex flex-col justify-end transform-gpu transition-all duration-300 lg:col-span-2 lg:row-span-2 animate-zoom-in stagger-1">
               <div className="relative mb-4 w-full aspect-[4/3] overflow-hidden rounded-lg lg:hidden">
                 <img src="/images/real-time-analytics-dashboard-tilted.avif" alt="Fast & Secure Payments" className="w-full h-full object-contain"/>
               </div>
@@ -385,150 +423,120 @@ https://docs.paybin.io/api`
       {/* Pricing Section */}
       <section id="pricing" className="py-20 bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-300 mb-4 high-contrast-glow">
-              Simple, transparent pricing
-            </h2>
-            <p className="text-xl text-gray-500">
-              No setup fees. No monthly fees. No hidden costs. Just pay for what you use.
+          <div className="text-center mb-16" ref={useScrollAnimation('scroll-flip-in-x')}>
+            <h2 className="text-4xl font-bold text-gray-300 mb-4">Simple, transparent pricing</h2>
+            <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+              No hidden fees, no surprises. Just straightforward pricing that grows with your business.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-black border border-gray-800 rounded-xl p-8">
-              <h3 className="text-2xl font-bold text-gray-300 mb-2">Starter</h3>
-              <div className="text-4xl font-bold text-gray-300 mb-4">Free</div>
-              <p className="text-gray-500 mb-6">Perfect for small businesses just getting started</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Free Plan */}
+            <div className="bg-gray-800 rounded-xl p-8 border border-gray-700 hover:bg-gray-700 transition-all duration-300" ref={useScrollAnimation('scroll-fade-in-left')}>
+              <h3 className="text-2xl font-bold text-gray-300 mb-4">Free</h3>
+              <div className="mb-6">
+                <span className="text-4xl font-bold text-gray-300">$0</span>
+                <span className="text-gray-400">/month</span>
+              </div>
               <ul className="space-y-3 mb-8">
-                <li className="flex items-center text-gray-500">
-                  <svg className="w-5 h-5 text-gray-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                <li className="flex items-center text-gray-400">
+                  <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  2.9% + 30¢ per transaction
+                  Up to 100 transactions/month
                 </li>
-                <li className="flex items-center text-gray-500">
-                  <svg className="w-5 h-5 text-gray-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                <li className="flex items-center text-gray-400">
+                  <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  Up to $10,000 monthly volume
+                  Basic API access
                 </li>
-                <li className="flex items-center text-gray-500">
-                  <svg className="w-5 h-5 text-gray-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                <li className="flex items-center text-gray-400">
+                  <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                   Standard support
                 </li>
-                <li className="flex items-center text-gray-500">
-                  <svg className="w-5 h-5 text-gray-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  Basic analytics
-                </li>
-                <li className="flex items-center text-gray-500">
-                  <svg className="w-5 h-5 text-gray-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  All payment methods
-                </li>
               </ul>
-              <button className="w-full bg-gray-800 text-gray-300 py-3 rounded-lg font-semibold hover:bg-gray-700 font-mono">
+              <button className="w-full bg-gray-700 text-gray-300 py-3 rounded-lg font-semibold hover:bg-gray-600 transition-colors">
                 Get Started
               </button>
             </div>
 
-            <div className="bg-black border-2 border-gray-600 rounded-xl p-8 relative">
+            {/* Pro Plan - Bigger */}
+            <div className="bg-gray-800 rounded-xl p-10 border-2 border-green-500 relative hover:bg-gray-700 transition-all duration-300 transform scale-105" ref={useScrollAnimation('scroll-zoom-in')}>
               <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                <span className="bg-gray-600 text-gray-300 px-4 py-1 rounded-full text-sm font-medium font-mono">Most popular</span>
+                <span className="bg-green-500 text-black px-4 py-1 rounded-full text-sm font-semibold">Most Popular</span>
               </div>
-              <h3 className="text-2xl font-bold text-gray-300 mb-2">Growth</h3>
-              <div className="text-4xl font-bold text-gray-300 mb-4">$29<span className="text-lg text-gray-500">/month</span></div>
-              <p className="text-gray-500 mb-6">For growing businesses with higher volume</p>
+              <h3 className="text-2xl font-bold text-gray-300 mb-4">Pro</h3>
+              <div className="mb-6">
+                <span className="text-4xl font-bold text-gray-300">$29</span>
+                <span className="text-gray-400">/month</span>
+              </div>
               <ul className="space-y-3 mb-8">
-                <li className="flex items-center text-gray-500">
-                  <svg className="w-5 h-5 text-gray-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                <li className="flex items-center text-gray-400">
+                  <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  2.5% + 25¢ per transaction
+                  Up to 10,000 transactions/month
                 </li>
-                <li className="flex items-center text-gray-500">
-                  <svg className="w-5 h-5 text-gray-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                <li className="flex items-center text-gray-400">
+                  <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  Up to $100,000 monthly volume
+                  Advanced API features
                 </li>
-                <li className="flex items-center text-gray-500">
-                  <svg className="w-5 h-5 text-gray-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                <li className="flex items-center text-gray-400">
+                  <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                   Priority support
                 </li>
-                <li className="flex items-center text-gray-500">
-                  <svg className="w-5 h-5 text-gray-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                <li className="flex items-center text-gray-400">
+                  <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  Advanced analytics
-                </li>
-                <li className="flex items-center text-gray-500">
-                  <svg className="w-5 h-5 text-gray-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  Custom checkout
-                </li>
-                <li className="flex items-center text-gray-500">
-                  <svg className="w-5 h-5 text-gray-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  Webhook events
+                  Custom branding
                 </li>
               </ul>
-              <button className="w-full bg-gray-800 text-gray-300 py-3 rounded-lg font-semibold hover:bg-gray-700 font-mono">
-                Start Growth Plan
+              <button className="w-full bg-green-500 text-black py-3 rounded-lg font-semibold hover:bg-green-400 transition-colors">
+                Start Pro
               </button>
             </div>
 
-            <div className="bg-black border border-gray-800 rounded-xl p-8">
-              <h3 className="text-2xl font-bold text-gray-300 mb-2">Enterprise</h3>
-              <div className="text-4xl font-bold text-gray-300 mb-4">$199<span className="text-lg text-gray-500">/month</span></div>
-              <p className="text-gray-500 mb-6">For large businesses with custom needs</p>
+            {/* Enterprise Plan */}
+            <div className="bg-gray-800 rounded-xl p-8 border border-gray-700 hover:bg-gray-700 transition-all duration-300" ref={useScrollAnimation('scroll-fade-in-right')}>
+              <h3 className="text-2xl font-bold text-gray-300 mb-4">Enterprise</h3>
+              <div className="mb-6">
+                <span className="text-4xl font-bold text-gray-300">Custom</span>
+              </div>
               <ul className="space-y-3 mb-8">
-                <li className="flex items-center text-gray-500">
-                  <svg className="w-5 h-5 text-gray-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                <li className="flex items-center text-gray-400">
+                  <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  Volume discounts available
+                  Unlimited transactions
                 </li>
-                <li className="flex items-center text-gray-500">
-                  <svg className="w-5 h-5 text-gray-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                <li className="flex items-center text-gray-400">
+                  <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  Unlimited monthly volume
+                  Custom integrations
                 </li>
-                <li className="flex items-center text-gray-500">
-                  <svg className="w-5 h-5 text-gray-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                <li className="flex items-center text-gray-400">
+                  <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                   Dedicated support
                 </li>
-                <li className="flex items-center text-gray-500">
-                  <svg className="w-5 h-5 text-gray-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                <li className="flex items-center text-gray-400">
+                  <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  Custom reporting
-                </li>
-                <li className="flex items-center text-gray-500">
-                  <svg className="w-5 h-5 text-gray-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  White-label options
-                </li>
-                <li className="flex items-center text-gray-500">
-                  <svg className="w-5 h-5 text-gray-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  SLA guarantee
+                  SLA guarantees
                 </li>
               </ul>
-              <button className="w-full bg-gray-800 text-gray-300 py-3 rounded-lg font-semibold hover:bg-gray-700 font-mono">
+              <button className="w-full bg-gray-700 text-gray-300 py-3 rounded-lg font-semibold hover:bg-gray-600 transition-colors">
                 Contact Sales
               </button>
             </div>
@@ -537,39 +545,141 @@ https://docs.paybin.io/api`
       </section>
 
       {/* Stats Section */}
-      <section className="py-20 bg-black">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <div>
-              <div className="text-3xl font-bold text-gray-300 mb-2 high-contrast-glow">$2M+</div>
-              <div className="text-gray-500">Processed annually</div>
+      <section className="py-20 bg-black overflow-hidden">
+        <div className="relative">
+          <div className="flex animate-marquee-right">
+            <div className="flex space-x-16 min-w-full">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-green-500 mb-2">10,000+</div>
+                <div className="text-gray-500">Active businesses</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-green-500 mb-2">$2M+</div>
+                <div className="text-gray-500">Processed annually</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-green-500 mb-2">99.99%</div>
+                <div className="text-gray-500">Uptime SLA</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-green-500 mb-2">&lt; 100ms</div>
+                <div className="text-gray-500">API response time</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-green-500 mb-2">10,000+</div>
+                <div className="text-gray-500">Active businesses</div>
+              </div>
             </div>
-            <div>
-              <div className="text-3xl font-bold text-gray-300 mb-2 high-contrast-glow">99.99%</div>
-              <div className="text-gray-500">Uptime SLA</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-gray-300 mb-2 high-contrast-glow">&lt; 100ms</div>
-              <div className="text-gray-500">API response time</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-gray-300 mb-2 high-contrast-glow">10,000+</div>
-              <div className="text-gray-500">Active businesses</div>
+            
+            {/* Duplicate for seamless loop */}
+            <div className="flex space-x-16 min-w-full">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-green-500 mb-2">10,000+</div>
+                <div className="text-gray-500">Active businesses</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-green-500 mb-2">$2M+</div>
+                <div className="text-gray-500">Processed annually</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-green-500 mb-2">99.99%</div>
+                <div className="text-gray-500">Uptime SLA</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-green-500 mb-2">&lt; 100ms</div>
+                <div className="text-gray-500">API response time</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-green-500 mb-2">10,000+</div>
+                <div className="text-gray-500">Active businesses</div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Crypto Support */}
-      <section className="py-20 bg-gray-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold text-gray-300 mb-8 high-contrast-glow">Supported Cryptocurrencies</h2>
-          <div className="flex flex-wrap justify-center gap-8">
-            {['bitcoin', 'ethereum', 'binance', 'litecoin', 'optimism', 'tron'].map((crypto) => (
-              <div key={crypto} className="text-gray-500 font-medium capitalize font-mono">
-                {crypto}
+      <section className="py-20 bg-gray-900 overflow-hidden">
+        <div className="relative">
+          <div className="flex animate-marquee-left">
+            <div className="flex space-x-8 min-w-full">
+              <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
+                <span className="text-xs text-gray-400 font-bold">₿</span>
               </div>
-            ))}
+              <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
+                <span className="text-xs text-gray-400 font-bold">Ξ</span>
+              </div>
+              <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
+                <span className="text-xs text-gray-400 font-bold">BNB</span>
+              </div>
+              <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
+                <span className="text-xs text-gray-400 font-bold">Ł</span>
+              </div>
+              <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
+                <span className="text-xs text-gray-400 font-bold">OP</span>
+              </div>
+              <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
+                <span className="text-xs text-gray-400 font-bold">TRX</span>
+              </div>
+              <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
+                <span className="text-xs text-gray-400 font-bold">₿</span>
+              </div>
+              <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
+                <span className="text-xs text-gray-400 font-bold">Ξ</span>
+              </div>
+              <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
+                <span className="text-xs text-gray-400 font-bold">BNB</span>
+              </div>
+              <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
+                <span className="text-xs text-gray-400 font-bold">Ł</span>
+              </div>
+              <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
+                <span className="text-xs text-gray-400 font-bold">OP</span>
+              </div>
+              <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
+                <span className="text-xs text-gray-400 font-bold">TRX</span>
+              </div>
+            </div>
+            
+            {/* Duplicate for seamless loop */}
+            <div className="flex space-x-8 min-w-full">
+              <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
+                <span className="text-xs text-gray-400 font-bold">₿</span>
+              </div>
+              <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
+                <span className="text-xs text-gray-400 font-bold">Ξ</span>
+              </div>
+              <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
+                <span className="text-xs text-gray-400 font-bold">BNB</span>
+              </div>
+              <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
+                <span className="text-xs text-gray-400 font-bold">Ł</span>
+              </div>
+              <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
+                <span className="text-xs text-gray-400 font-bold">OP</span>
+              </div>
+              <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
+                <span className="text-xs text-gray-400 font-bold">TRX</span>
+              </div>
+              <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
+                <span className="text-xs text-gray-400 font-bold">₿</span>
+              </div>
+              <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
+                <span className="text-xs text-gray-400 font-bold">Ξ</span>
+              </div>
+              <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
+                <span className="text-xs text-gray-400 font-bold">BNB</span>
+              </div>
+              <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
+                <span className="text-xs text-gray-400 font-bold">Ł</span>
+              </div>
+              <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
+                <span className="text-xs text-gray-400 font-bold">OP</span>
+              </div>
+              <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
+                <span className="text-xs text-gray-400 font-bold">TRX</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -780,7 +890,7 @@ https://docs.paybin.io/api`
       {/* Integration Section */}
       <section id="integration" className="py-20 bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
+          <div className="text-center mb-12" ref={useScrollAnimation('scroll-fade-in-up')}>
             <h2 className="text-4xl font-bold text-gray-300 mb-4">Integrate in under a minute</h2>
             <p className="text-xl text-gray-400 max-w-3xl mx-auto">
               Get started with PayBin's powerful API and start accepting crypto payments in minutes
@@ -788,47 +898,50 @@ https://docs.paybin.io/api`
           </div>
 
           {/* Tab Navigation */}
-          <div className="flex justify-center">
-            <div className="flex space-x-1 bg-gray-800 p-1 rounded-lg mb-8">
+          <div className="flex justify-center mb-8">
+            <div className="flex space-x-1 bg-gray-800 p-1 rounded-lg">
               {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => {
-                    if (tab.href) {
-                      window.open(tab.href, '_blank');
-                    } else {
-                      setActiveTab(tab.id);
-                    }
-                  }}
-                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                    activeTab === tab.id
-                      ? 'bg-gray-700 text-white'
-                      : 'text-gray-400 hover:text-white hover:bg-gray-700'
-                  }`}
-                >
-                  {tab.label}
-                </button>
+                tab.external ? (
+                  <a
+                    key={tab.id}
+                    href={tab.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-4 py-2 rounded-md text-sm font-medium text-gray-400 hover:text-gray-300 transition-colors"
+                  >
+                    {tab.label}
+                  </a>
+                ) : (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                      activeTab === tab.id
+                        ? 'bg-gray-700 text-white'
+                        : 'text-gray-400 hover:text-gray-300'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                )
               ))}
             </div>
           </div>
 
-          {/* Main Content Card */}
-          <div className="bg-black rounded-xl shadow-lg border border-gray-800 overflow-hidden">
-            <div className="grid lg:grid-cols-2">
-              {/* Left Section - Features */}
-              <div className="p-8">
-                <h3 className="text-2xl font-bold text-gray-300 mb-4">{currentContent.title}</h3>
-                <p className="text-gray-500 mb-6">
-                  {currentContent.description}
-                </p>
-                
-                <div className="space-y-4 mb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            {/* Left Section - Content */}
+            <div ref={useScrollAnimation('scroll-fade-in-left')}>
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-2xl font-bold text-gray-300 mb-4">{currentContent.title}</h3>
+                  <p className="text-gray-400 text-lg leading-relaxed">{currentContent.description}</p>
+                </div>
+
+                <div className="space-y-3">
                   {currentContent.features.map((feature, index) => (
-                    <div key={index} className="flex items-center text-gray-400">
-                      <svg className="w-5 h-5 text-green-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
-                      <span>{feature}</span>
+                    <div key={index} className="flex items-center space-x-3">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span className="text-gray-300">{feature}</span>
                     </div>
                   ))}
                 </div>
@@ -845,8 +958,10 @@ https://docs.paybin.io/api`
                   </svg>
                 </a>
               </div>
+            </div>
 
-              {/* Right Section - Code Example */}
+            {/* Right Section - Code Example */}
+            <div ref={useScrollAnimation('scroll-fade-in-right')}>
               <div className="p-8 bg-gradient-to-br from-orange-500/20 via-purple-500/20 to-blue-500/20 relative">
                 <div className="bg-gray-900 p-6 rounded-lg border border-gray-700">
                   <div className="flex items-center justify-between mb-4">
@@ -884,236 +999,218 @@ https://docs.paybin.io/api`
       </section>
 
         {/* Testimonials Section */}
-        <section className="py-20 bg-gray-900">
-          {/* Main Quote */}
-          <div className="text-center mb-16">
-            <div className="text-6xl text-gray-600 mb-8">"</div>
-            <blockquote className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-300 mb-8 max-w-4xl mx-auto leading-tight">
-              The speed at which Polar is executing on the financial infrastructure primitives the new world needs is very impressive
-            </blockquote>
-            <div className="flex items-center justify-center space-x-4">
-              <div className="w-12 h-12 bg-gray-600 rounded-full"></div>
-              <div className="text-left">
-                <div className="font-semibold text-gray-300">Guillermo Rauch</div>
-                <div className="text-sm text-gray-500">CEO & Founder of Vercel</div>
+        <section className="py-20 bg-black">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16" ref={useScrollAnimation('scroll-flip-in-x')}>
+              <h2 className="text-4xl font-bold text-gray-300 mb-4">Loved by developers worldwide</h2>
+              <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+                Join thousands of developers who trust PayBin for their payment needs
+              </p>
+            </div>
+
+            {/* Main Testimonial */}
+            <div className="text-center mb-16" ref={useScrollAnimation('scroll-bounce-in')}>
+              <blockquote className="text-2xl md:text-3xl text-gray-300 italic mb-6">
+                "PayBin has transformed how we handle payments. The API is incredibly simple and the documentation is crystal clear. We integrated it in under an hour!"
+              </blockquote>
+              <div className="flex items-center justify-center space-x-4">
+                <div className="w-12 h-12 bg-gray-800 rounded-full flex items-center justify-center">
+                  <span className="text-xl text-gray-400">👨‍💻</span>
+                </div>
+                <div className="text-left">
+                  <div className="text-gray-300 font-semibold">Alex Chen</div>
+                  <div className="text-gray-500 text-sm">CTO at TechFlow</div>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Marquee Testimonials */}
-          <div className="relative overflow-hidden w-full">
-            <div className="flex flex-col space-y-6 animate-marquee">
-              {/* Row 1 */}
-              <div className="flex space-x-6 min-w-max">
-                <div className="bg-black p-6 rounded-xl border border-gray-800 w-[380px] h-[300px]">
-                  <div className="flex items-start space-x-3 mb-3">
-                    <div className="w-10 h-10 bg-gray-600 rounded-full flex-shrink-0"></div>
-                    <div>
-                      <div className="font-semibold text-gray-300">Andrea Bizzotto</div>
-                      <div className="text-sm text-gray-500">@biz84</div>
-                    </div>
+          {/* Marquee Testimonials - Full Width */}
+          <div className="overflow-hidden">
+            {/* Row 1 */}
+            <div className="flex animate-marquee mb-6">
+              <div className="flex space-x-6 min-w-full">
+                <div className="min-w-[300px] h-[300px] bg-gray-800 rounded-xl p-6 flex flex-col justify-between">
+                  <p className="text-gray-300 text-lg">"The best payment solution we've used. Period."</p>
+                  <div>
+                    <div className="text-gray-300 font-semibold">Sarah Johnson</div>
+                    <div className="text-gray-500 text-sm">@sarahj</div>
                   </div>
-                  <p className="text-gray-400 text-sm leading-relaxed">
-                    I've been integrating Polar recently and had a fantastic experience! Great DX and the team responds to support super quickly!
-                  </p>
                 </div>
-
-                <div className="bg-black p-6 rounded-xl border border-gray-800 w-[380px] h-[300px]">
-                  <div className="flex items-start space-x-3 mb-3">
-                    <div className="w-10 h-10 bg-gray-600 rounded-full flex-shrink-0"></div>
-                    <div>
-                      <div className="font-semibold text-gray-300">enjie</div>
-                      <div className="text-sm text-gray-500">@im_enjie</div>
-                    </div>
+                <div className="min-w-[300px] h-[300px] bg-gray-800 rounded-xl p-6 flex flex-col justify-between">
+                  <p className="text-gray-300 text-lg">"Incredible developer experience. Everything just works."</p>
+                  <div>
+                    <div className="text-gray-300 font-semibold">Mike Rodriguez</div>
+                    <div className="text-gray-500 text-sm">@mikerod</div>
                   </div>
-                  <p className="text-gray-400 text-sm leading-relaxed">
-                    I finally tried @polar_sh after all the hype, and it's hands down the smoothest, most developer-friendly, and straightforward payment integration out there.
-                  </p>
                 </div>
-
-                <div className="bg-black p-6 rounded-xl border border-gray-800 w-[380px] h-[300px]">
-                  <div className="flex items-start space-x-3 mb-3">
-                    <div className="w-10 h-10 bg-gray-600 rounded-full flex-shrink-0"></div>
-                    <div>
-                      <div className="font-semibold text-gray-300">Samuel Colvin</div>
-                      <div className="text-sm text-gray-500">@samuel_colvin</div>
-                    </div>
+                <div className="min-w-[300px] h-[300px] bg-gray-800 rounded-xl p-6 flex flex-col justify-between">
+                  <p className="text-gray-300 text-lg">"Finally, a payment API that doesn't make me want to cry."</p>
+                  <div>
+                    <div className="text-gray-300 font-semibold">Emma Wilson</div>
+                    <div className="text-gray-500 text-sm">@emmaw</div>
                   </div>
-                  <p className="text-gray-400 text-sm leading-relaxed">
-                    Amazing! Really excited to seeing how this turns out. Polar is the cutting edge of how open source might be financed in the future.
-                  </p>
                 </div>
-
-                <div className="bg-black p-6 rounded-xl border border-gray-800 w-[380px] h-[300px]">
-                  <div className="flex items-start space-x-3 mb-3">
-                    <div className="w-10 h-10 bg-gray-600 rounded-full flex-shrink-0"></div>
-                    <div>
-                      <div className="font-semibold text-gray-300">Linus Ekenstam</div>
-                      <div className="text-sm text-gray-500">@LinusEkenstam</div>
-                    </div>
+                <div className="min-w-[300px] h-[300px] bg-gray-800 rounded-xl p-6 flex flex-col justify-between">
+                  <p className="text-gray-300 text-lg">"Switched from Stripe to PayBin. Never looking back."</p>
+                  <div>
+                    <div className="text-gray-300 font-semibold">David Kim</div>
+                    <div className="text-gray-500 text-sm">@davidk</div>
                   </div>
-                  <p className="text-gray-400 text-sm leading-relaxed">
-                    I've been waiting for this so hard. LFG, congratulations on the launch guys!
-                  </p>
                 </div>
-
-                <div className="bg-black p-6 rounded-xl border border-gray-800 w-[380px] h-[300px]">
-                  <div className="flex items-start space-x-3 mb-3">
-                    <div className="w-10 h-10 bg-gray-600 rounded-full flex-shrink-0"></div>
-                    <div>
-                      <div className="font-semibold text-gray-300">Mike Andreuzza</div>
-                      <div className="text-sm text-gray-500">@Mike_Andreuzza</div>
-                    </div>
+                <div className="min-w-[300px] h-[300px] bg-gray-800 rounded-xl p-6 flex flex-col justify-between">
+                  <p className="text-gray-300 text-lg">"The documentation is a work of art. So clear and helpful."</p>
+                  <div>
+                    <div className="text-gray-300 font-semibold">Lisa Chen</div>
+                    <div className="text-gray-500 text-sm">@lisac</div>
                   </div>
-                  <p className="text-gray-400 text-sm leading-relaxed">
-                    Officially using @polar_sh for payments and lowered prices on Lexington. I also want to thank @birk and the people at Polar for helping me out with the move and adapting the UI to my use case during the move. They are worth their weight in gold.
-                  </p>
                 </div>
-
-                <div className="bg-black p-6 rounded-xl border border-gray-800 w-[380px] h-[300px]">
-                  <div className="flex items-start space-x-3 mb-3">
-                    <div className="w-10 h-10 bg-gray-600 rounded-full flex-shrink-0"></div>
-                    <div>
-                      <div className="font-semibold text-gray-300">Jonathan Wilke</div>
-                      <div className="text-sm text-gray-500">@jonathan_wilke</div>
-                    </div>
+                <div className="min-w-[300px] h-[300px] bg-gray-800 rounded-xl p-6 flex flex-col justify-between">
+                  <p className="text-gray-300 text-lg">"Zero downtime, zero issues. PayBin is rock solid."</p>
+                  <div>
+                    <div className="text-gray-300 font-semibold">Tom Anderson</div>
+                    <div className="text-gray-500 text-sm">@tomand</div>
                   </div>
-                  <p className="text-gray-400 text-sm leading-relaxed">
-                    Wow this is just amazing. With @polar_sh I can directly give the customer access to the supastarter repository and invite them to the discord server 🔥
-                  </p>
-                </div>
-
-                <div className="bg-black p-6 rounded-xl border border-gray-800 w-[380px] h-[300px]">
-                  <div className="flex items-start space-x-3 mb-3">
-                    <div className="w-10 h-10 bg-gray-600 rounded-full flex-shrink-0"></div>
-                    <div>
-                      <div className="font-semibold text-gray-300">Bohdan Shulha</div>
-                      <div className="text-sm text-gray-500">@b_shulha</div>
-                    </div>
-                  </div>
-                  <p className="text-gray-400 text-sm leading-relaxed">
-                    I feel like @polar_sh is @vercel of payments. Keep pushing! 💖
-                  </p>
-                </div>
-
-                <div className="bg-black p-6 rounded-xl border border-gray-800 w-[380px] h-[300px]">
-                  <div className="flex items-start space-x-3 mb-3">
-                    <div className="w-10 h-10 bg-gray-600 rounded-full flex-shrink-0"></div>
-                    <div>
-                      <div className="font-semibold text-gray-300">David Parks</div>
-                      <div className="text-sm text-gray-500">@dparksdev</div>
-                    </div>
-                  </div>
-                  <p className="text-gray-400 text-sm leading-relaxed">
-                    The @polar_sh plugin for @better_ magic. Automatically creates customers Maps your databases id to an ex reference Creates checkout, portal and we routes for you
-                  </p>
                 </div>
               </div>
-
-              {/* Row 2 */}
-              <div className="flex space-x-6 min-w-max">
-                <div className="bg-black p-6 rounded-xl border border-gray-800 w-[320px] h-[220px]">
-                  <div className="flex items-start space-x-3 mb-3">
-                    <div className="w-10 h-10 bg-gray-600 rounded-full flex-shrink-0"></div>
-                    <div>
-                      <div className="font-semibold text-gray-300">Steven Tey</div>
-                      <div className="text-sm text-gray-500">@steventey</div>
-                    </div>
+              
+              {/* Duplicate for seamless loop */}
+              <div className="flex space-x-6 min-w-full">
+                <div className="min-w-[300px] h-[300px] bg-gray-800 rounded-xl p-6 flex flex-col justify-between">
+                  <p className="text-gray-300 text-lg">"The best payment solution we've used. Period."</p>
+                  <div>
+                    <div className="text-gray-300 font-semibold">Sarah Johnson</div>
+                    <div className="text-gray-500 text-sm">@sarahj</div>
                   </div>
-                  <p className="text-gray-400 text-sm leading-relaxed">
-                    Open source + great DX + responsive support always wins. If you're selling stuff online and haven't tried @polar_sh yet — 100% recommend doing so!
-                  </p>
                 </div>
-
-                <div className="bg-black p-6 rounded-xl border border-gray-800 w-[320px] h-[220px]">
-                  <div className="flex items-start space-x-3 mb-3">
-                    <div className="w-10 h-10 bg-gray-600 rounded-full flex-shrink-0"></div>
-                    <div>
-                      <div className="font-semibold text-gray-300">Alex Bass</div>
-                      <div className="text-sm text-gray-500">@alexhbass</div>
-                    </div>
+                <div className="min-w-[300px] h-[300px] bg-gray-800 rounded-xl p-6 flex flex-col justify-between">
+                  <p className="text-gray-300 text-lg">"Incredible developer experience. Everything just works."</p>
+                  <div>
+                    <div className="text-gray-300 font-semibold">Mike Rodriguez</div>
+                    <div className="text-gray-500 text-sm">@mikerod</div>
                   </div>
-                  <p className="text-gray-400 text-sm leading-relaxed">
-                    We switched to @polar_sh because of their killer API, UX, and product. Also love that it's Open-Source. Their team cares A LOT as well. Worth the minor fee difference.
-                  </p>
                 </div>
-
-                <div className="bg-black p-6 rounded-xl border border-gray-800 w-[320px] h-[220px]">
-                  <div className="flex items-start space-x-3 mb-3">
-                    <div className="w-10 h-10 bg-gray-600 rounded-full flex-shrink-0"></div>
-                    <div>
-                      <div className="font-semibold text-gray-300">Dmitry Vlasov</div>
-                      <div className="text-sm text-gray-500">@vlasov</div>
-                    </div>
+                <div className="min-w-[300px] h-[300px] bg-gray-800 rounded-xl p-6 flex flex-col justify-between">
+                  <p className="text-gray-300 text-lg">"Finally, a payment API that doesn't make me want to cry."</p>
+                  <div>
+                    <div className="text-gray-300 font-semibold">Emma Wilson</div>
+                    <div className="text-gray-500 text-sm">@emmaw</div>
                   </div>
-                  <p className="text-gray-400 text-sm leading-relaxed">
-                    Someone here recommended @polar_sh, and I can only say the experience has been very smooth so far.
-                  </p>
                 </div>
-
-                <div className="bg-black p-6 rounded-xl border border-gray-800 w-[320px] h-[220px]">
-                  <div className="flex items-start space-x-3 mb-3">
-                    <div className="w-10 h-10 bg-gray-600 rounded-full flex-shrink-0"></div>
-                    <div>
-                      <div className="font-semibold text-gray-300">Filip K</div>
-                      <div className="text-sm text-gray-500">@itsfilipk</div>
-                    </div>
+                <div className="min-w-[300px] h-[300px] bg-gray-800 rounded-xl p-6 flex flex-col justify-between">
+                  <p className="text-gray-300 text-lg">"Switched from Stripe to PayBin. Never looking back."</p>
+                  <div>
+                    <div className="text-gray-300 font-semibold">David Kim</div>
+                    <div className="text-gray-500 text-sm">@davidk</div>
                   </div>
-                  <p className="text-gray-400 text-sm leading-relaxed">
-                    In 8 years as a developer I can't recall having such a smooth onboarding + integration experience as with @polar_sh. Everything from the UI, docs and CLI tool is intuitive and 'just works'. If you are looking to integrate international payments into your business, I can't recommend them enough.
-                  </p>
                 </div>
-
-                <div className="bg-black p-6 rounded-xl border border-gray-800 w-[320px] h-[220px]">
-                  <div className="flex items-start space-x-3 mb-3">
-                    <div className="w-10 h-10 bg-gray-600 rounded-full flex-shrink-0"></div>
-                    <div>
-                      <div className="font-semibold text-gray-300">Jim Raptis</div>
-                      <div className="text-sm text-gray-500">@d__raptis</div>
-                    </div>
+                <div className="min-w-[300px] h-[300px] bg-gray-800 rounded-xl p-6 flex flex-col justify-between">
+                  <p className="text-gray-300 text-lg">"The documentation is a work of art. So clear and helpful."</p>
+                  <div>
+                    <div className="text-gray-300 font-semibold">Lisa Chen</div>
+                    <div className="text-gray-500 text-sm">@lisac</div>
                   </div>
-                  <p className="text-gray-400 text-sm leading-relaxed">
-                    I've migrated the gradients.fm pre-order checkout to @polar_sh 💳 Much quicker to load and has a more beautiful checkout page imo.
-                  </p>
                 </div>
-
-                <div className="bg-black p-6 rounded-xl border border-gray-800 w-[320px] h-[220px]">
-                  <div className="flex items-start space-x-3 mb-3">
-                    <div className="w-10 h-10 bg-gray-600 rounded-full flex-shrink-0"></div>
-                    <div>
-                      <div className="font-semibold text-gray-300">Jonathan Bloomfield</div>
-                      <div className="text-sm text-gray-500">@Champdebloom</div>
-                    </div>
+                <div className="min-w-[300px] h-[300px] bg-gray-800 rounded-xl p-6 flex flex-col justify-between">
+                  <p className="text-gray-300 text-lg">"Zero downtime, zero issues. PayBin is rock solid."</p>
+                  <div>
+                    <div className="text-gray-300 font-semibold">Tom Anderson</div>
+                    <div className="text-gray-500 text-sm">@tomand</div>
                   </div>
-                  <p className="text-gray-400 text-sm leading-relaxed">
-                    I spent hours wrestling with Stripe last night and I know it's a skill issue, but @polar_sh's DX is so peak this wouldn't have been a problem. Just waiting on CAD support so I can migrate and it can't come soon enough!
-                  </p>
                 </div>
+              </div>
+            </div>
 
-                <div className="bg-black p-6 rounded-xl border border-gray-800 w-[320px] h-[220px]">
-                  <div className="flex items-start space-x-3 mb-3">
-                    <div className="w-10 h-10 bg-gray-600 rounded-full flex-shrink-0"></div>
-                    <div>
-                      <div className="font-semibold text-gray-300">Mitchell Hashimoto</div>
-                      <div className="text-sm text-gray-500">@mitchellh</div>
-                    </div>
+            {/* Row 2 */}
+            <div className="flex animate-marquee">
+              <div className="flex space-x-6 min-w-full">
+                <div className="min-w-[300px] h-[300px] bg-gray-800 rounded-xl p-6 flex flex-col justify-between">
+                  <p className="text-gray-300 text-lg">"Integration was a breeze. Love the developer experience."</p>
+                  <div>
+                    <div className="text-gray-300 font-semibold">Alex Thompson</div>
+                    <div className="text-gray-500 text-sm">@alexth</div>
                   </div>
-                  <p className="text-gray-400 text-sm leading-relaxed">
-                    I've joined Polar as an advisor! I think it benefits everyone for devs to have more options to get paid to work on their passions, to support upstreams, and for users to have more confidence/transparency in the software they're supporting/purchasing.
-                  </p>
                 </div>
-
-                <div className="bg-black p-6 rounded-xl border border-gray-800 w-[320px] h-[220px]">
-                  <div className="flex items-start space-x-3 mb-3">
-                    <div className="w-10 h-10 bg-gray-600 rounded-full flex-shrink-0"></div>
-                    <div>
-                      <div className="font-semibold text-gray-300">kitze</div>
-                      <div className="text-sm text-gray-500">@thekitze</div>
-                    </div>
+                <div className="min-w-[300px] h-[300px] bg-gray-800 rounded-xl p-6 flex flex-col justify-between">
+                  <p className="text-gray-300 text-lg">"Best crypto payment solution we've found so far."</p>
+                  <div>
+                    <div className="text-gray-300 font-semibold">Maria Garcia</div>
+                    <div className="text-gray-500 text-sm">@mariag</div>
                   </div>
-                  <p className="text-gray-400 text-sm leading-relaxed">
-                    I just saw the plugin and oh my god
-                  </p>
+                </div>
+                <div className="min-w-[300px] h-[300px] bg-gray-800 rounded-xl p-6 flex flex-col justify-between">
+                  <p className="text-gray-300 text-lg">"The API is so clean and well-documented."</p>
+                  <div>
+                    <div className="text-gray-300 font-semibold">James Wilson</div>
+                    <div className="text-gray-500 text-sm">@jamesw</div>
+                  </div>
+                </div>
+                <div className="min-w-[300px] h-[300px] bg-gray-800 rounded-xl p-6 flex flex-col justify-between">
+                  <p className="text-gray-300 text-lg">"Reliable, fast, and developer-friendly."</p>
+                  <div>
+                    <div className="text-gray-300 font-semibold">Sophie Lee</div>
+                    <div className="text-gray-500 text-sm">@sophiel</div>
+                  </div>
+                </div>
+                <div className="min-w-[300px] h-[300px] bg-gray-800 rounded-xl p-6 flex flex-col justify-between">
+                  <p className="text-gray-300 text-lg">"Customer support is exceptional."</p>
+                  <div>
+                    <div className="text-gray-300 font-semibold">Ryan Park</div>
+                    <div className="text-gray-500 text-sm">@ryanp</div>
+                  </div>
+                </div>
+                <div className="min-w-[300px] h-[300px] bg-gray-800 rounded-xl p-6 flex flex-col justify-between">
+                  <p className="text-gray-300 text-lg">"Perfect for our startup needs."</p>
+                  <div>
+                    <div className="text-gray-300 font-semibold">Nina Patel</div>
+                    <div className="text-gray-500 text-sm">@ninap</div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Duplicate for seamless loop */}
+              <div className="flex space-x-6 min-w-full">
+                <div className="min-w-[300px] h-[300px] bg-gray-800 rounded-xl p-6 flex flex-col justify-between">
+                  <p className="text-gray-300 text-lg">"Integration was a breeze. Love the developer experience."</p>
+                  <div>
+                    <div className="text-gray-300 font-semibold">Alex Thompson</div>
+                    <div className="text-gray-500 text-sm">@alexth</div>
+                  </div>
+                </div>
+                <div className="min-w-[300px] h-[300px] bg-gray-800 rounded-xl p-6 flex flex-col justify-between">
+                  <p className="text-gray-300 text-lg">"Best crypto payment solution we've found so far."</p>
+                  <div>
+                    <div className="text-gray-300 font-semibold">Maria Garcia</div>
+                    <div className="text-gray-500 text-sm">@mariag</div>
+                  </div>
+                </div>
+                <div className="min-w-[300px] h-[300px] bg-gray-800 rounded-xl p-6 flex flex-col justify-between">
+                  <p className="text-gray-300 text-lg">"The API is so clean and well-documented."</p>
+                  <div>
+                    <div className="text-gray-300 font-semibold">James Wilson</div>
+                    <div className="text-gray-500 text-sm">@jamesw</div>
+                  </div>
+                </div>
+                <div className="min-w-[300px] h-[300px] bg-gray-800 rounded-xl p-6 flex flex-col justify-between">
+                  <p className="text-gray-300 text-lg">"Reliable, fast, and developer-friendly."</p>
+                  <div>
+                    <div className="text-gray-300 font-semibold">Sophie Lee</div>
+                    <div className="text-gray-500 text-sm">@sophiel</div>
+                  </div>
+                </div>
+                <div className="min-w-[300px] h-[300px] bg-gray-800 rounded-xl p-6 flex flex-col justify-between">
+                  <p className="text-gray-300 text-lg">"Customer support is exceptional."</p>
+                  <div>
+                    <div className="text-gray-300 font-semibold">Ryan Park</div>
+                    <div className="text-gray-500 text-sm">@ryanp</div>
+                  </div>
+                </div>
+                <div className="min-w-[300px] h-[300px] bg-gray-800 rounded-xl p-6 flex flex-col justify-between">
+                  <p className="text-gray-300 text-lg">"Perfect for our startup needs."</p>
+                  <div>
+                    <div className="text-gray-300 font-semibold">Nina Patel</div>
+                    <div className="text-gray-500 text-sm">@ninap</div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1202,13 +1299,15 @@ https://docs.paybin.io/api`
             {/* Company Info */}
             <div className="col-span-2 md:col-span-1">
               <div className="flex items-center gap-2 mb-4">
-                <Image
-                  src="/paybin-logo-white.svg"
-                  alt="PayBin Logo"
-                  width={120}
-                  height={32}
-                  className="h-8 w-auto"
-                />
+                <a href="/" className="flex items-center">
+                  <Image
+                    src="/paybin-logo-white.svg"
+                    alt="PayBin Logo"
+                    width={120}
+                    height={32}
+                    className="h-8 w-auto"
+                  />
+                </a>
               </div>
               <p className="text-sm text-gray-400 mb-4">
                 PayBin is owned and operated by Flopays UAB. Registration Number 306776864, Žalgirio g. 88-101, 09303 Vilnius
@@ -1301,3 +1400,5 @@ https://docs.paybin.io/api`
     </div>
   );
 }
+
+
